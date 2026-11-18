@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Informativa sulla visita</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;
+    padding:24px;background:#f4f6f8;color:#17202a;font:16px system-ui,sans-serif}
+    main{width:min(100%,520px);background:white;padding:30px;border-radius:18px;
+    box-shadow:0 8px 30px #17202a12}h1{font-size:1.55rem;margin-top:0}
+    p{line-height:1.55;color:#344054}.notice{background:#f2f4f7;padding:14px;border-radius:10px;font-size:.92rem}
+    button{width:100%;padding:14px;border:0;border-radius:10px;background:#175cd3;color:white;
+    font-size:1rem;font-weight:650;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+    #status{margin-top:14px;min-height:24px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Informativa sulla visita</h1>
+  <p>Questa pagina può registrare il tuo indirizzo IP pubblico e ricavare una località approssimativa
+  (ad esempio Paese, regione e città) tramite un servizio di geolocalizzazione IP.</p>
+  <div class="notice">
+    L'IP non fornisce la posizione GPS né l'indirizzo di casa. La stima può essere imprecisa,
+    soprattutto con reti mobili, VPN o proxy. I dati raccolti sono conservati per un massimo
+    di 30 giorni e sono consultabili solo dal gestore del sito nell'area riservata.
+  </div>
+  <p>Premendo il pulsante acconsenti alla registrazione dell'IP e alla stima geografica per questa visita.
+  Se non acconsenti, non viene inviata la richiesta di registrazione.</p>
+  <button id="consent">Acconsento e continuo</button>
+  <div id="status" role="status" aria-live="polite"></div>
+</main>
+<script>
+const button = document.getElementById("consent");
+const status = document.getElementById("status");
+button.addEventListener("click", async () => {
+  button.disabled = true;
+  status.textContent = "Invio della richiesta…";
+  try {
+    const r = await fetch("/api/consent-and-record", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({consent:true})
+    });
+    const data = await r.json();
+    status.textContent = data.message || data.error || "Operazione completata.";
+  } catch {
+    status.textContent = "Non è stato possibile completare la richiesta. Riprova più tardi.";
+    button.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
